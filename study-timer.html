@@ -1,0 +1,147 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Pixel Study Stopwatch</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+    body {
+      background: #DCE3E6;
+      margin: 0;
+      padding: 0;
+      font-family: 'Press Start 2P', system-ui;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    img {
+      width: 128px;
+      image-rendering: pixelated;
+      margin-bottom: -20px;
+    }
+
+    #label {
+      font-family: 'Press Start 2P', monospace;
+      color: #000000;
+      font-size: 12px;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+
+    #timer {
+      font-family: 'Press Start 2P', monospace;
+      color: #f68a98;
+      font-size: 18px;
+      margin-top: 5px;
+    }
+
+    /* Container for buttons to place on same row */
+    #buttonRow {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    button {
+      font-family: 'Press Start 2P', monospace;
+      background-color: #000000;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      text-transform: uppercase;
+      font-size: 12px;
+
+      /* Fix horizontal and vertical centering */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      /* Optional: slight 3D pixel effect */
+      box-shadow: 0 3px #555;
+    }
+
+    button:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px #555;
+    }
+  </style>
+</head>
+
+<body>
+  <img src="bongo-kitty.gif" alt="Cute Pixel Art">
+  <div id="label">TIME STUDIED:</div>
+  <div id="timer">00:00:00</div>
+
+  <div id="buttonRow">
+    <button id="resetButton">RESET</button>
+    <button id="pauseButton">PAUSE</button>
+  </div>
+
+  <script>
+    let elapsed = 0;
+    const timerElement = document.getElementById("timer");
+    const labelElement = document.getElementById("label");
+    const resetButton = document.getElementById("resetButton");
+    const pauseButton = document.getElementById("pauseButton");
+
+    const savedElapsed = localStorage.getItem("study_elapsed");
+    const lastSession = localStorage.getItem("study_lastSession");
+    const now = Date.now();
+
+    if (savedElapsed && lastSession && (now - parseInt(lastSession, 10)) < 10000) {
+      elapsed = parseInt(savedElapsed, 10);
+    } else {
+      elapsed = 0;
+    }
+
+    function formatTime(secs) {
+      const h = String(Math.floor(secs / 3600)).padStart(2, '0');
+      const m = String(Math.floor((secs % 3600) / 60)).padStart(2, '0');
+      const s = String(secs % 60).padStart(2, '0');
+      return `${h}:${m}:${s}`;
+    }
+
+    timerElement.textContent = formatTime(elapsed);
+
+    let running = true;
+
+    setInterval(() => {
+      if (running) {
+        elapsed++;
+        timerElement.textContent = formatTime(elapsed);
+      }
+    }, 1000);
+
+    window.addEventListener("beforeunload", () => {
+      localStorage.setItem("study_elapsed", elapsed);
+      localStorage.setItem("study_lastSession", Date.now());
+    });
+
+    // Reset button
+    resetButton.addEventListener("click", () => {
+      elapsed = 0;
+      timerElement.textContent = formatTime(elapsed);
+      localStorage.removeItem("study_elapsed");
+      localStorage.removeItem("study_lastSession");
+    });
+
+    // Pause button
+    pauseButton.addEventListener("click", () => {
+      running = !running;
+      if (!running) {
+        labelElement.textContent = "BREAK TIME:";
+        pauseButton.textContent = "RESUME";
+      } else {
+        labelElement.textContent = "TIME STUDIED:";
+        pauseButton.textContent = "PAUSE";
+      }
+    });
+  </script>
+</body>
+
+</html>
